@@ -1,25 +1,30 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM python:3.11-slim
+FROM openeuler/openeuler:22.03-lts-sp4
+
+ENV PYTHONPATH=/usr/bin/python3
 
 ARG ARCH="cpu"
 
-RUN apt-get update -y && apt-get install -y --no-install-recommends --fix-missing \
-    libgl1-mesa-glx \
-    libjemalloc-dev
+RUN yum update -y && \
+    yum install -y --setopt=install_weak_deps=False \
+    mesa-libGL \
+    python3-pip \
+    jemalloc-devel && \
+    yum clean all
 
 RUN useradd -m -s /bin/bash user && \
     mkdir -p /home/user && \
-    chown -R user /home/user/
+    chown -R user:user /home/user/
 
 COPY comps /home/user/comps
 
 USER user
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    if [ ${ARCH} = "cpu" ]; then pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu; fi && \
-    pip install --no-cache-dir -r /home/user/comps/retrievers/redis/langchain/requirements.txt
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    if [ "${ARCH}" = "cpu" ]; then pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu; fi && \
+    pip3 install --no-cache-dir -r /home/user/comps/retrievers/redis/langchain/requirements.txt
 
 ENV PYTHONPATH=$PYTHONPATH:/home/user
 
