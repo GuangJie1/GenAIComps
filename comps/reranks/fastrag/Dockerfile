@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM openeuler/openeuler:22.03-lts-sp4
+FROM openeuler/openeuler:24.03-lts
 
 ENV LANG=C.UTF-8
 ENV PYTHONPH=/usr/bin/python3

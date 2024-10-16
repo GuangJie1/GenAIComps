@@ -1,20 +1,38 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM python:3.11-slim
+FROM openeuler/openeuler:24.03-lts
 
 ENV LANG=C.UTF-8
 
 ARG ARCH="cpu"
 
-RUN apt-get update -y && apt-get install -y --no-install-recommends --fix-missing \
-    build-essential \
-    default-jre \
-    libgl1-mesa-glx \
-    libjemalloc-dev \
-    libreoffice \
+RUN yum update -y && \ 
+    yum install -y --setopt=install_weak_deps=False \
+    wget \
+    java-11-openjdk \
+    mesa-libGL \
+    shadow-utils \
+    jemalloc jemalloc-devel \
     poppler-utils \
-    tesseract-ocr
+    python3-pip \
+    tesseract \
+    tesseract-langpack-eng
+
+    
+RUN mkdir -p /tmp/LibreOffice/LibreOffice && \
+    wget -O /tmp/LibreOffice/LibreOffice.tar.gz https://mirrors.cloud.tencent.com/libreoffice/libreoffice/stable/24.8.2/rpm/x86_64/LibreOffice_24.8.2_Linux_x86-64_rpm.tar.gz && \
+    tar -zxvf /tmp/LibreOffice/LibreOffice.tar.gz -C /tmp/LibreOffice/LibreOffice/ --strip-components 1 && \
+    yum -y install /tmp/LibreOffice/LibreOffice/RPMS/*.rpm && \
+    mkdir -p /tmp/LibreOffice/langpack_zh-CN && \
+    wget -O /tmp/LibreOffice/langpack_zh-CN.tar.gz https://mirrors.cloud.tencent.com/libreoffice/libreoffice/stable/24.8.2/rpm/x86_64/LibreOffice_24.8.2_Linux_x86-64_rpm_langpack_zh-CN.tar.gz && \
+    tar -zxvf /tmp/LibreOffice/langpack_zh-CN.tar.gz -C /tmp/LibreOffice/langpack_zh-CN/ --strip-components 1 && \
+    yum -y install /tmp/LibreOffice/langpack_zh-CN/RPMS/*.rpm && \
+    mkdir -p /tmp/LibreOffice/helppack_zh-CN && \
+    wget -O /tmp/LibreOffice/helppack_zh-CN.tar.gz https://mirrors.cloud.tencent.com/libreoffice/libreoffice/stable/24.8.2/rpm/x86_64/LibreOffice_24.8.2_Linux_x86-64_rpm_helppack_zh-CN.tar.gz && \
+    tar -zxvf /tmp/LibreOffice/helppack_zh-CN.tar.gz -C /tmp/LibreOffice/helppack_zh-CN/ --strip-components 1 && \
+    yum -y install /tmp/LibreOffice/helppack_zh-CN/RPMS/*.rpm && \
+    rm -rf /tmp/LibreOffice
 
 RUN useradd -m -s /bin/bash user && \
     mkdir -p /home/user && \
@@ -24,11 +42,11 @@ USER user
 
 COPY comps /home/user/comps
 
-RUN pip install --no-cache-dir --upgrade pip setuptools && \
-    if [ ${ARCH} = "cpu" ]; then pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu; fi && \
-    pip install --no-cache-dir -r /home/user/comps/dataprep/redis/langchain/requirements.txt
+RUN pip3 install --no-cache-dir --upgrade pip setuptools && \
+    if [ ${ARCH} = "cpu" ]; then pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu; fi && \
+    pip3 install --no-cache-dir -r /home/user/comps/dataprep/redis/langchain/requirements.txt
 
-ENV PYTHONPATH=$PYTHONPATH:/home/user
+ENV PYTHONPATH=/usr/bin/python3:/home/user
 
 USER root
 

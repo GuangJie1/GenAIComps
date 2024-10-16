@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-FROM openeuler/openeuler:22.03-lts-sp4
+FROM openeuler/openeuler:24.03-lts
 
 ENV PYTHONPATH=/usr/bin/python3
 
@@ -12,6 +12,7 @@ RUN yum -y update && \
     yum install -y --setopt=install_weak_deps=False \
     mesa-libGL \
     python3-pip \
+    shadow-utils \
     jemalloc-devel && \
     yum clean all
 
