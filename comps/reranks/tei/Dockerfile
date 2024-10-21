@@ -4,14 +4,14 @@
 FROM openeuler/openeuler:24.03-lts
 
 ENV LANG=C.UTF-8
-ENV PYTHONPATH=/usr/bin/python3
+ENV PYTHONPATH=/usr/bin/python
 
 ARG ARCH="cpu"
 
 RUN yum -y update && \
     yum install -y --setopt=install_weak_deps=False \
     mesa-libGL \
-    python3-pip \
+    python-pip \
     shadow-utils \
     jemalloc-devel && \
     yum clean all
@@ -24,9 +24,9 @@ USER user
 
 COPY comps /home/user/comps
 
-RUN pip3 install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip && \
     if [ ${ARCH} = "cpu" ]; then pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu; fi && \
-    pip3 install --no-cache-dir -r /home/user/comps/reranks/tei/requirements.txt
+    pip install --no-cache-dir -r /home/user/comps/reranks/tei/requirements.txt
 
 ENV PYTHONPATH=$PYTHONPATH:/home/user
 

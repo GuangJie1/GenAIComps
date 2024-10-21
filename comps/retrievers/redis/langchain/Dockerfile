@@ -3,32 +3,30 @@
 
 FROM openeuler/openeuler:24.03-lts
 
-ENV PYTHONPATH=/usr/bin/python3
-
 ARG ARCH="cpu"
 
 RUN yum update -y && \
     yum install -y --setopt=install_weak_deps=False \
-    mesa-libGL \
-    python3-pip \
+    python-pip python \
     shadow-utils \
-    jemalloc-devel && \
-    yum clean all
+    mesa-libGL \
+    jemalloc-devel
 
 RUN useradd -m -s /bin/bash user && \
     mkdir -p /home/user && \
-    chown -R user:user /home/user/
-
-COPY comps /home/user/comps
+    chown -R user /home/user/
 
 USER user
 
-RUN pip3 install --no-cache-dir --upgrade pip && \
-    if [ "${ARCH}" = "cpu" ]; then pip3 install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu; fi && \
-    pip3 install --no-cache-dir -r /home/user/comps/retrievers/redis/langchain/requirements.txt
+COPY comps /home/user/comps
 
+RUN pip install --no-cache-dir --upgrade pip && \
+    if [ ${ARCH} = "cpu" ]; then pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu; fi && \
+    pip install --no-cache-dir -r /home/user/comps/reranks/tei/requirements.txt
+
+ENV PYTHONPATH=/usr/bin/python
 ENV PYTHONPATH=$PYTHONPATH:/home/user
 
-WORKDIR /home/user/comps/retrievers/redis/langchain
+WORKDIR /home/user/comps/reranks/tei
 
-ENTRYPOINT ["python", "retriever_redis.py"]
+ENTRYPOINT ["python", "reranking_tei.py"]
